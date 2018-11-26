@@ -12,16 +12,22 @@ static int _min(int a, int b) {
 }
 
 //init fifo
-bool myfifo_init(myfifo_t* fifo, unsigned int size) {
+myfifo_t* myfifo_create(unsigned int size) {
 	char* temp = malloc(size);
 	if (temp == NULL) {
-		return false;
+		return NULL;
 	}
 	else {
-		fifo->buf = temp;
-		fifo->in = 0;
-		fifo->out = 0;
-		fifo->size = size;
+		/*
+		in order to initialize const member in struct
+		memcpy a exist myfifo_t obj
+		ref:
+		https://stackoverflow.com/questions/2219001/how-to-initialize-const-members-of-structs-on-the-heap
+		*/
+		myfifo_t fifo = { temp, 0, 0, size };
+		myfifo_t* ret = malloc(sizeof(myfifo_t));
+		memcpy(ret, &fifo, sizeof(myfifo_t));
+		return ret;
 	}
 }
 
@@ -29,13 +35,14 @@ bool myfifo_init(myfifo_t* fifo, unsigned int size) {
 void myfifo_free(myfifo_t* fifo) {
 	if (fifo != NULL && fifo->buf != NULL) {
 		free(fifo->buf);
-		memset(fifo, 0, sizeof(myfifo_t));
+		free(fifo);
+		//memset(fifo, 0, sizeof(myfifo_t));
 	}
 }
 
 //get data from fifo to buffer
 //return actual bytes transffered
-int myfifo_get(myfifo_t* fifo, char* buffer, int len) {
+int myfifo_push(myfifo_t* fifo, char* buffer, int len) {
 	if (myfifo_empty(fifo) || len <= 0) return 0;
 
 	unsigned int till_end = fifo->size - get_mask_pos(fifo->out, fifo->size);
@@ -61,7 +68,7 @@ int myfifo_get(myfifo_t* fifo, char* buffer, int len) {
 
 //put data to fifo
 //return actual bytes transffered
-int myfifo_set(myfifo_t* fifo, const char* buffer, int len) {
+int myfifo_pop(myfifo_t* fifo, const char* buffer, int len) {
 	if (len + myfifo_get_used_space(fifo) > fifo->size) {
 		//overflow, do nothing
 		return 0;
