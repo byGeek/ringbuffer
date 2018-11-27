@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MASK_POS(x, y) ((x)%(y))
 static unsigned int get_mask_pos(unsigned int pos, unsigned int size) {
 	return pos % size;
 }
@@ -42,56 +43,50 @@ void myfifo_free(myfifo_t* fifo) {
 
 //get data from fifo to buffer
 //return actual bytes transffered
-int myfifo_push(myfifo_t* fifo, char* buffer, int len) {
+int myfifo_pop(myfifo_t* fifo, char* buffer, int len) {
 	if (myfifo_empty(fifo) || len <= 0) return 0;
 
-	unsigned int till_end = fifo->size - get_mask_pos(fifo->out, fifo->size);
-	unsigned int used = myfifo_get_used_space(fifo);
-	unsigned int ret = _min(used, len);
-	char* out_pos = fifo->buf + get_mask_pos(fifo->out, fifo->size);
-	char* in_pos = fifo->buf + get_mask_pos(fifo->in, fifo->size);
+	unsigned int till_end = fifo->size - MASK_POS(fifo->out, fifo->size);
+	unsigned int avail = fifo->in - fifo->out;  //we don't allow overflow happen
+
+	if (len > avail) {
+		len = avail;
+	}
 
 	if (len <= till_end) {
-		memcpy(buffer, out_pos, ret);
+		memcpy(buffer, fifo->buf + MASK_POS(fifo->out, fifo->size), len);
 	}
-	else
-	{
-		unsigned int from_start = _min(len - till_end, get_mask_pos(fifo->in, fifo->size));
-		memcpy(buffer, out_pos, till_end);
-		memcpy(buffer + till_end, fifo->buf, from_start);
-		ret = till_end + from_start;
+	else {
+		memcpy(buffer, fifo->buf + MASK_POS(fifo->out, fifo->size), till_end);
+		memcpy(buffer + till_end, fifo->buf, len - till_end);
 	}
-
-	fifo->out += ret;
-	return ret;
+	fifo->out += len;
+	return len;
 }
 
 //put data to fifo
 //return actual bytes transffered
-int myfifo_pop(myfifo_t* fifo, const char* buffer, int len) {
-	if (len + myfifo_get_used_space(fifo) > fifo->size) {
-		//overflow, do nothing
-		return 0;
+int myfifo_push(myfifo_t* fifo, const char* buffer, int len) {
+
+	if (len == 0) return 0;
+	unsigned int avail = fifo->size - (fifo->in - fifo->out);
+
+	if (len > avail) {
+		len = avail;
+	}
+
+	unsigned int till_end = fifo->size - MASK_POS(fifo->in, fifo->size);
+
+	if (len <= till_end) {
+		memcpy(fifo->buf + MASK_POS(fifo->in, fifo->size), buffer, len);
 	}
 	else {
-		unsigned int ret = 0;
-		char* out_pos = fifo->buf + get_mask_pos(fifo->out, fifo->size);
-		char* in_pos = fifo->buf + get_mask_pos(fifo->in, fifo->size);
-
-		if (get_mask_pos(fifo->in, fifo->size) + len <= fifo->size) {
-			memcpy(in_pos, buffer, len);
-			ret = len;
-		}
-		else {
-			unsigned int till_end = fifo->size - get_mask_pos(fifo->in, fifo->size);
-			memcpy(in_pos, buffer, till_end);
-			memcpy(fifo->buf, buffer + till_end, len - till_end);
-			ret = len;
-		}
-
-		fifo->in += ret;
-		return ret;
+		memcpy(fifo->buf + MASK_POS(fifo->in, fifo->size), buffer, till_end);
+		memcpy(fifo->buf, buffer + till_end, len - till_end);
 	}
+
+	fifo->in += len;
+	return len;
 }
 
 //check if fifo empty
