@@ -1,7 +1,7 @@
 
 #include "myfifo.h"
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>  //for memcpy function
 
 #define MASK_POS(x, y) ((x)%(y))
 

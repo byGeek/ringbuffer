@@ -23,7 +23,7 @@
     <ClCompile Include="myfifo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source.c">
+    <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

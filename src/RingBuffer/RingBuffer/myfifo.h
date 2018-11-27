@@ -1,6 +1,10 @@
 #pragma once
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif // __cplusplus
+
 
 /*
 if used for single producer and single consumer envirronment
@@ -41,3 +45,6 @@ unsigned int myfifo_get_used_space(myfifo_t* fifo);
 
 void myfifo_clear(myfifo_t* fifo);
 
+#ifdef __cplusplus
+}
+#endif // __cplusplus
