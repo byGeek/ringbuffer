@@ -24,11 +24,11 @@ void myfifo_free(myfifo_t* fifo);
 
 //get data from fifo to buffer
 //return actual bytes transffered
-int myfifo_pop(myfifo_t* fifo, char* buffer, int len);
+unsigned int myfifo_pop(myfifo_t* fifo, char* buffer, unsigned int len);
 
 //put data to fifo
 //return actual bytes transffered
-int myfifo_push(myfifo_t* fifo, const char* buffer, int len);
+unsigned int myfifo_push(myfifo_t* fifo, const char* buffer, unsigned int len);
 
 //check if fifo empty
 bool myfifo_empty(myfifo_t* fifo);
@@ -36,5 +36,8 @@ bool myfifo_empty(myfifo_t* fifo);
 //check if fifo full
 bool myfifo_full(myfifo_t* fifo);
 
-int myfifo_get_used_space(myfifo_t* fifo);
+//get used space in fifo
+unsigned int myfifo_get_used_space(myfifo_t* fifo);
+
+void myfifo_clear(myfifo_t* fifo);
 

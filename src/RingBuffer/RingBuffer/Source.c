@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 int main() {
-	myfifo_t* ptr= myfifo_create(10);
+	myfifo_t* ptr = myfifo_create(10);
 
 	printf("fifo empty: %s\n", myfifo_empty(ptr) ? "true" : "false");
 	printf("fifo full: %s\n", myfifo_full(ptr) ? "true" : "false");
@@ -25,6 +25,11 @@ int main() {
 	myfifo_pop(ptr, buffer, 6);
 	printf("fifo full: %s\n", myfifo_full(ptr) ? "true" : "false");
 
+	myfifo_clear(ptr);
+	memset(buffer, 0, sizeof(buffer));
+
+	unsigned int len =myfifo_pop(ptr, buffer, 5);
+	len = myfifo_push(ptr, "hellowordhelloword", 12);
 	myfifo_free(ptr);
 
 }

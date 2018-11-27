@@ -4,13 +4,6 @@
 #include <string.h>
 
 #define MASK_POS(x, y) ((x)%(y))
-static unsigned int get_mask_pos(unsigned int pos, unsigned int size) {
-	return pos % size;
-}
-
-static int _min(int a, int b) {
-	return a <= b ? a : b;
-}
 
 //init fifo
 myfifo_t* myfifo_create(unsigned int size) {
@@ -43,7 +36,7 @@ void myfifo_free(myfifo_t* fifo) {
 
 //get data from fifo to buffer
 //return actual bytes transffered
-int myfifo_pop(myfifo_t* fifo, char* buffer, int len) {
+unsigned int myfifo_pop(myfifo_t* fifo, char* buffer, unsigned int len) {
 	if (myfifo_empty(fifo) || len <= 0) return 0;
 
 	unsigned int till_end = fifo->size - MASK_POS(fifo->out, fifo->size);
@@ -66,7 +59,7 @@ int myfifo_pop(myfifo_t* fifo, char* buffer, int len) {
 
 //put data to fifo
 //return actual bytes transffered
-int myfifo_push(myfifo_t* fifo, const char* buffer, int len) {
+unsigned int myfifo_push(myfifo_t* fifo, const char* buffer, unsigned int len) {
 
 	if (len == 0) return 0;
 	unsigned int avail = fifo->size - (fifo->in - fifo->out);
@@ -99,6 +92,12 @@ bool myfifo_full(myfifo_t* fifo) {
 	return (fifo->in - fifo->out == fifo->size) ? true : false;
 }
 
-int myfifo_get_used_space(myfifo_t* fifo) {
+unsigned int myfifo_get_used_space(myfifo_t* fifo) {
 	return fifo->in - fifo->out;
+}
+
+//clear fifo, reset in, out cursor to ZERO
+void myfifo_clear(myfifo_t* fifo) {
+	fifo->in = 0;
+	fifo->out = 0;
 }
